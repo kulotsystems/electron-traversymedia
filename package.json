@@ -5,6 +5,7 @@
   "description": "An app to resize image dimensions.",
   "main": "main.js",
   "scripts": {
+    "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "kulotsystems",
