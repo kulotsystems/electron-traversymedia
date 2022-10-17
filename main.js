@@ -9,9 +9,27 @@ const isMac = process.platform === 'darwin';
 
 // menu template
 const menu = [
+    ...(isMac ? [{
+        label: app.name,
+        submenu: [
+            {
+                label: 'About',
+                click: createAboutWindow
+            }
+        ]
+    }] : []),
     {
         role: 'fileMenu'
-    }
+    },
+    ...(!isMac ? [{
+        label: 'Help',
+        submenu: [
+            {
+                label: 'About',
+                click: createAboutWindow
+            }
+        ]
+    }] : [])
 ];
 
 
@@ -31,6 +49,22 @@ function createMainWindow() {
     mainWindow.loadFile(path.join(__dirname, './renderer/index.html'))
         .then(() => {
             console.log("main window loaded");
+        });
+}
+
+
+// create about window
+function createAboutWindow() {
+    const aboutWindow = new BrowserWindow({
+        title: 'About Image Resizer',
+        width: 300,
+        height: 300
+    });
+
+
+    aboutWindow.loadFile(path.join(__dirname, './renderer/about.html'))
+        .then(() => {
+            console.log("about window loaded");
         });
 }
 
