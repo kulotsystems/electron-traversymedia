@@ -1,5 +1,5 @@
 const path = require('path');
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 
 
 // environment checks
@@ -72,6 +72,12 @@ function createAboutWindow() {
             console.log("about window loaded");
         });
 }
+
+
+// respond to ipcRenderer resize
+ipcMain.on('image:resize', (e, options) => {
+    console.log(options);
+});
 
 
 // when app is ready
