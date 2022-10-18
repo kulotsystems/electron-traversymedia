@@ -1,5 +1,8 @@
 const path = require('path');
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const os   = require('os');
+const fs   = require('fs');
+const resizeImg = require('resize-img');
+const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
 
 
 // environment checks
@@ -34,8 +37,9 @@ const menu = [
 
 
 // create main window
+let mainWindow;
 function createMainWindow() {
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         title: 'Image Resizer',
         width: isDev ? 1200 : 500,
         height: 600,
@@ -76,8 +80,40 @@ function createAboutWindow() {
 
 // respond to ipcRenderer resize
 ipcMain.on('image:resize', (e, options) => {
-    console.log(options);
+    options.dest = path.join(os.homedir(), 'imageresizer');
+    resizeImage(options);
 });
+
+
+// resize the image
+async function resizeImage({ imgPath, width, height, dest }) {
+    try {
+        // call resizeImg
+        const newPath = await resizeImg(fs.readFileSync(imgPath), {
+            width : +width, // + converts string to integer
+            height: +height
+        });
+
+        // create filename
+        const filename = path.basename(imgPath);
+
+        // create destination folder if not exists
+        if(!fs.existsSync(dest)) {
+            fs.mkdirSync(dest);
+        }
+
+        // write file to destination folder
+        fs.writeFileSync(path.join(dest, filename), newPath);
+
+        // send success to renderer
+        mainWindow.webContents.send('image:done')
+
+        // open destination folder
+        shell.openPath(dest);
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 
 // when app is ready
@@ -87,6 +123,9 @@ app.whenReady().then(() => {
     // implement menu
     const mainMenu = Menu.buildFromTemplate(menu);
     Menu.setApplicationMenu(mainMenu);
+
+    // remove mainWindow from memory on close
+    mainWindow.on('closed', () => mainWindow = null);
 
     // when app is activated
     app.on('activate', () => {

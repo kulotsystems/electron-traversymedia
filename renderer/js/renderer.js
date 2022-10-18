@@ -54,6 +54,12 @@ function sendImage(e) {
 }
 
 
+// catch the image:done event
+ipcRenderer.on('image:done', () => {
+    alertSucess(`Image reisized to ${widthInput.value} x ${heightInput.value}`);
+});
+
+
 // check image file
 function isFileImage(file) {
     const acceptedImageTypes = ['image/gif', 'image/png', 'image/jpeg'];
